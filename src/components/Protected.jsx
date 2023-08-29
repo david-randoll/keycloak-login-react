@@ -1,19 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { client } from "../hooks/useAuth";
 
 const Protected = () => {
-    const checkHealth = () => {
+    const [name, setName] = useState("");
+    useEffect(() => {
+        loadUserInfo();
+    }, []);
+
+    const logToken = () => {
         console.log("token: ", client.token);
-        fetch("https://licensing.scubeenterprise.com/api/license/actuator/health", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${client.token}`,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                console.log(data);
+        client.updateToken();
+    };
+
+    const loadUserProfile = () => {
+        client
+            .loadUserProfile()
+            .then((profile) => {
+                console.log(profile);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
+
+    const loadUserInfo = () => {
+        client
+            .loadUserInfo()
+            .then((info) => {
+                console.log(info);
+                setName(info.name);
             })
             .catch((error) => {
                 console.error(error);
@@ -22,8 +37,24 @@ const Protected = () => {
 
     return (
         <div>
-            Protected
-            <button onClick={() => checkHealth()}>Check Health</button>
+            <p>logged in userId: {client.subject}</p>
+            <p>user: {name}</p>
+            <button style={{ margin: "20px" }} onClick={() => logToken()}>
+                Log Token
+            </button>
+            <button style={{ margin: "20px", background: "lightblue" }} onClick={() => client.accountManagement()}>
+                Account Management
+            </button>
+            <button style={{ margin: "20px", background: "pink" }} onClick={() => client.logout()}>
+                Logout
+            </button>
+            <button style={{ margin: "20px" }} onClick={() => loadUserProfile()}>
+                Load user Profile
+            </button>
+
+            <button style={{ margin: "20px" }} onClick={() => loadUserInfo()}>
+                Load user Info
+            </button>
         </div>
     );
 };
